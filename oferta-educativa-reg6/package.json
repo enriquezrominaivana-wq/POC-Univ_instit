@@ -1,0 +1,31 @@
+{
+  "name": "oferta-educativa-reg6",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Dashboard y mapa interactivo de la oferta educativa superior de la Región Educativa 6 y alrededores",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "data:build": "node scripts/build-data.mjs",
+    "check": "node scripts/check-page.mjs http://localhost:5173/",
+    "check:interactions": "node scripts/check-interactions.mjs http://localhost:5173/",
+    "check:supabase": "node scripts/check-supabase.mjs"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.4.0",
+    "@deck.gl/layers": "^9.4.0",
+    "@deck.gl/react": "^9.4.0",
+    "@supabase/supabase-js": "^2.118.0",
+    "lucide-react": "^1.61.0",
+    "maplibre-gl": "^6.16.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-map-gl": "^8.1.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.5"
+  }
+}
