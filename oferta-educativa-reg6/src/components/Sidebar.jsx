@@ -4,6 +4,7 @@ import { CATEGORIAS, CATEGORIA_META, ORDEN_CATEGORIAS, formatearNumero } from '.
 /**
  * Panel lateral: filtros por municipio y tipo de institución,
  * leyenda de colores, botón "Mi Ubicación" y origen de los datos.
+ * En móvil/tablet se comporta como un drawer deslizante (props `abierta`/`onCerrar`).
  */
 export default function Sidebar({
   municipios = [],
@@ -21,6 +22,9 @@ export default function Sidebar({
   onMiUbicacion,
   fuente = null,
   errorDatos = null,
+  id,
+  abierta = false,
+  onCerrar,
 }) {
   const ICONOS = {
     [CATEGORIAS.PUBLICA]: <GraduationCap size={16} />,
@@ -32,7 +36,7 @@ export default function Sidebar({
   const localizando = estadoUbicacion === 'loading';
 
   return (
-    <aside className="sidebar">
+    <aside id={id} className={`sidebar ${abierta ? 'is-abierta' : ''}`}>
       <header className="sidebar__cabecera">
         <span className="sidebar__logo" aria-hidden="true">
           <Landmark size={22} />
@@ -41,6 +45,14 @@ export default function Sidebar({
           <h1 className="sidebar__titulo">Oferta Educativa Superior</h1>
           <p className="sidebar__subtitulo">Región Educativa 6 y alrededores</p>
         </div>
+        <button
+          type="button"
+          className="sidebar__cerrar"
+          onClick={onCerrar}
+          aria-label="Cerrar filtros"
+        >
+          <X size={20} />
+        </button>
       </header>
 
       <div className="sidebar__bloque">

@@ -26,6 +26,14 @@ const MAX_ZOOM = 17;
 
 const RADIUS_USUARIO = { metros: 180, halo: 900 };
 
+// En pantallas táctiles los marcadores necesitan ser más grandes para poder tocarlos.
+const ES_TACTIL =
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(pointer: coarse)').matches;
+
+const RADIO_MARCADOR = ES_TACTIL ? { min: 11, max: 38 } : { min: 7, max: 32 };
+
 export default function MapView({
   registros = [],
   ubicacion = null, // { latitude, longitude }
@@ -35,7 +43,7 @@ export default function MapView({
   onReset,
 }) {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const [hover, setHover] = useState(null); // { registro, x, y }
+  const [hover, setHover] = useState(null); // { registro, x, y, fijo }
 
   // Recentra el mapa cuando App lo pide (botón "Mi ubicación").
   useEffect(() => {
@@ -65,11 +73,17 @@ export default function MapView({
       filled: true,
       getRadius: RADIUS_USUARIO.metros,
       radiusUnits: 'meters',
-      radiusMinPixels: 7,
-      radiusMaxPixels: 32,
+      radiusMinPixels: RADIO_MARCADOR.min,
+      radiusMaxPixels: RADIO_MARCADOR.max,
       pickable: true,
-      onHover: ({ object, x, y }) => {
-        setHover(object ? { registro: object, x, y } : null);
+      onHover: ({ object, x, y }) =>
+        setHover((prev) => {
+          if (prev?.fijo) return prev; // el tooltip fijado por toque no lo pisa el hover
+          return object ? { registro: object, x, y, fijo: false } : null;
+        }),
+      onClick: ({ object, x, y }) => {
+        // En táctil no hay hover: al tocar un punto se fija la ficha.
+        setHover(object ? { registro: object, x, y, fijo: true } : null);
       },
     });
 

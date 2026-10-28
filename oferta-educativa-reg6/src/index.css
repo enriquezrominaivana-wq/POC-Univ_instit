@@ -76,6 +76,16 @@ button {
   gap: 12px;
 }
 
+/* ── Barra superior (solo móvil/tablet) ──────────────────────────────────── */
+
+.appbar {
+  display: none;
+}
+
+.appbar__overlay {
+  display: none;
+}
+
 /* ── Sidebar ─────────────────────────────────────────────────────────────── */
 
 .sidebar {
@@ -88,6 +98,20 @@ button {
   background: var(--color-superficie);
   border-right: 1px solid var(--color-borde);
   overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sidebar__cerrar {
+  display: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  color: var(--color-texto);
+  background: #f1f5f9;
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .sidebar__cabecera {
@@ -706,6 +730,8 @@ button {
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
+/* Tablet / móvil: barra superior + sidebar como drawer, y el contenido se
+   reordena (KPIs → mapa → gráfico) para que el mapa sea protagonista. */
 @media (max-width: 980px) {
   .app {
     display: block;
@@ -713,43 +739,253 @@ button {
     overflow: visible;
   }
 
-  .sidebar {
-    width: 100%;
-    border-right: none;
+  /* Barra superior */
+  .appbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: 10px 14px;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    background: var(--color-superficie);
     border-bottom: 1px solid var(--color-borde);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
   }
 
+  .appbar__logo {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: #fff;
+    background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+    flex-shrink: 0;
+  }
+
+  .appbar__titulo {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .appbar__boton {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--color-texto);
+    background: #f1f5f9;
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .appbar__boton.is-activo {
+    color: #fff;
+    background: var(--color-publica);
+    border-color: var(--color-publica);
+  }
+
+  .appbar__overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    padding: 0;
+    background: rgba(15, 23, 42, 0.5);
+    border: 0;
+    cursor: pointer;
+    animation: fundido 0.2s ease;
+  }
+
+  @keyframes fundido {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Drawer de filtros */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    width: min(340px, 88vw);
+    border-right: 1px solid var(--color-borde);
+    box-shadow: 12px 0 32px rgba(15, 23, 42, 0.25);
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    padding-top: calc(20px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .sidebar.is-abierta {
+    transform: none;
+  }
+
+  .sidebar__cerrar {
+    display: grid;
+    width: 44px;
+    height: 44px;
+  }
+
+  .sidebar__select {
+    font-size: 1rem; /* evita el zoom automático al enfocar en móviles */
+    min-height: 44px;
+  }
+
+  .categoria {
+    min-height: 44px;
+  }
+
+  .sidebar__limpiar {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+
+  .sidebar__ubicacion {
+    min-height: 46px;
+  }
+
+  /* Contenido: KPIs → mapa → gráfico */
   .contenido {
     overflow: visible;
+    gap: 12px;
     padding: 12px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .dashboard {
+    display: contents;
+  }
+
+  .kpis {
+    order: 1;
   }
 
   .mapa {
-    height: 62vh;
-    min-height: 340px;
+    order: 2;
+    height: 58vh;
+    min-height: 320px;
     flex: none;
   }
 
+  .dashboard__chart {
+    order: 3;
+  }
+
+  .mapa__boton {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .mapa__atribucion {
+    font-size: 0.6rem;
+  }
+
   .chart__fila {
-    grid-template-columns: 118px 1fr 30px;
+    grid-template-columns: minmax(110px, 170px) 1fr 36px;
+    gap: 8px;
+    padding: 4px;
+  }
+
+  .chart__etiqueta {
+    white-space: normal;
   }
 
   .chart__cuerpo {
-    max-height: 250px;
+    max-height: 280px;
   }
 }
 
+/* Teléfonos */
 @media (max-width: 560px) {
   .kpis {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .kpi {
+    padding: 10px 11px;
+    gap: 9px;
+  }
+
+  .kpi__icono {
+    width: 32px;
+    height: 32px;
   }
 
   .kpi__valor {
     font-size: 1.25rem;
   }
 
+  .kpi__titulo {
+    font-size: 0.72rem;
+  }
+
+  .kpi__detalle {
+    display: none; /* ahorra altura en pantallas chicas */
+  }
+
+  .chart {
+    padding: 10px 12px;
+  }
+
+  .chart__cabecera {
+    margin-bottom: 6px;
+  }
+
+  .chart__leyenda {
+    gap: 8px;
+    font-size: 0.68rem;
+  }
+
+  /* Fila del gráfico en dos niveles: nombre+total arriba, barra abajo */
   .chart__fila {
-    grid-template-columns: 96px 1fr 28px;
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'etiqueta valor'
+      'barra barra';
+    row-gap: 5px;
+    padding: 6px 4px;
+  }
+
+  .chart__etiqueta {
+    grid-area: etiqueta;
+    min-height: 32px;
+    font-size: 0.82rem;
+  }
+
+  .chart__valor {
+    grid-area: valor;
+  }
+
+  .chart__barra {
+    grid-area: barra;
+    height: 18px;
+  }
+
+  .chart__cuerpo {
+    max-height: none;
+  }
+
+  .mapa {
+    height: 55vh;
+    min-height: 300px;
+  }
+
+  .tooltip {
+    max-width: min(240px, 78vw);
   }
 }
