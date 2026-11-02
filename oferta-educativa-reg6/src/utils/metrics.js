@@ -2,15 +2,39 @@
  * Reglas de clasificación y cálculo de indicadores (Fase 2 y Fase 4 del plan).
  *
  * - Universidad Pública: objeto === 'Universidad' Y nombre.startsWith('Universidad Nacional...')
- * - Universidad Privada: objeto === 'Universidad' Y NO cumple la condición de pública.
+ * - Universidad Privada: objeto === 'Universidad' Y NO cumple la condición de pública
  * - Instituto:            objeto !== 'Universidad' (ISFD, técnicos, conservatorios, escuelas de arte, etc.)
  */
+
+// Datos extra (sitio web, dirección, teléfono) por id de institución:
+// enriquecimiento.json lo genera scripts/enrich-osm.mjs (OpenStreetMap);
+// enriquecimiento-curado.json se mantiene a mano. Son FALLBACK: solo rellenan
+// los campos que la fila trae vacíos, así Supabase (o el dataset local)
+// tiene prioridad cuando define un valor.
+import ENRIQUECIMIENTO_OSM from '../data/enriquecimiento.json';
+import ENRIQUECIMIENTO_CURADO from '../data/enriquecimiento-curado.json';
 
 export const CATEGORIAS = {
   PUBLICA: 'universidad_publica',
   PRIVADA: 'universidad_privada',
   INSTITUTO: 'instituto',
 };
+
+const VACIO = [null, undefined, ''];
+
+function datosExtra(fila) {
+  const clave = String(fila.id);
+  const extra = {
+    ...(ENRIQUECIMIENTO_OSM[clave] || {}),
+    ...(ENRIQUECIMIENTO_CURADO[clave] || {}),
+  };
+  const relleno = {};
+  for (const [campo, valor] of Object.entries(extra)) {
+    if (VACIO.includes(valor)) continue;
+    if (VACIO.includes(fila[campo])) relleno[campo] = valor;
+  }
+  return relleno;
+}
 
 export const CATEGORIA_META = {
   [CATEGORIAS.PUBLICA]: {
@@ -69,6 +93,7 @@ export function prepararRegistros(registros) {
     })
     .map((fila) => ({
       ...fila,
+      ...datosExtra(fila),
       longitud: Number(fila.longitud),
       latitud: Number(fila.latitud),
       municipio_nombre: fila.municipio_nombre || 'Sin municipio',

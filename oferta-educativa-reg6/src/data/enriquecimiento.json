@@ -1,0 +1,65 @@
+{
+  "1": {
+    "sitio_web": "https://www.unpaz.edu.ar/",
+    "direccion": "Leandro N. Alem 4731"
+  },
+  "4": {
+    "direccion": "Juan María Gutiérrez 1150"
+  },
+  "6": {
+    "sitio_web": "https://udesa.edu.ar/",
+    "direccion": "Vito Dumas 234"
+  },
+  "7": {
+    "sitio_web": "https://www.sanfernando.unlu.edu.ar/",
+    "direccion": "Avenida del Libertador 1700",
+    "telefono": "+54 11 4744-4584"
+  },
+  "9": {
+    "sitio_web": "https://www.ees6artigas.org/",
+    "direccion": "3 de Febrero 1810",
+    "telefono": "+54 11 4744-6381"
+  },
+  "10": {
+    "direccion": "3 de Febrero 1275",
+    "telefono": "+54 11 4744-5959"
+  },
+  "20": {
+    "direccion": "Avenida Santa Fe 1740",
+    "telefono": "+54 11 4792-8899"
+  },
+  "21": {
+    "direccion": "Avenida 25 de Mayo 327",
+    "telefono": "+54 11 4575-4224"
+  },
+  "22": {
+    "direccion": "Nicolás Avellaneda 450",
+    "telefono": "+54 11 4732 0734; +54 11 4732 0735"
+  },
+  "23": {
+    "sitio_web": "https://vaneduc.edu.ar/ldv/",
+    "direccion": "Bernardo de Irigoyen 696",
+    "telefono": "+54 11 4737-5313"
+  },
+  "24": {
+    "sitio_web": "https://www.cesyt.edu.ar/",
+    "direccion": "Don Bosco 159",
+    "telefono": "+54 11 4747-5177"
+  },
+  "25": {
+    "direccion": "Eduardo Costa 848",
+    "telefono": "+54 11 4792-1958"
+  },
+  "26": {
+    "direccion": "Rivadavia 454",
+    "telefono": "+54 11 4743-7487"
+  },
+  "27": {
+    "direccion": "Leandro N. Alem 226",
+    "telefono": "+54 11 4747-4479"
+  },
+  "52": {
+    "direccion": "Presidente Hipólito Yrigoyen 725",
+    "telefono": "+54 11 4795-1507"
+  }
+}
