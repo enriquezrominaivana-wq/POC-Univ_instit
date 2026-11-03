@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Landmark, SlidersHorizontal } from 'lucide-react';
 import Sidebar from './components/Sidebar.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import { useFetchData } from './hooks/useFetchData.js';
@@ -23,6 +23,22 @@ export default function App() {
   const [categorias, setCategorias] = useState(ORDEN_CATEGORIAS);
   const [foco, setFoco] = useState(null);
   const [centrarPendiente, setCentrarPendiente] = useState(false);
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
+
+  // Drawer de filtros (móvil/tablet): Escape para cerrar + bloquear scroll del fondo.
+  useEffect(() => {
+    if (!filtrosAbiertos) return undefined;
+    const alTeclar = (e) => {
+      if (e.key === 'Escape') setFiltrosAbiertos(false);
+    };
+    window.addEventListener('keydown', alTeclar);
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', alTeclar);
+      document.body.style.overflow = overflow;
+    };
+  }, [filtrosAbiertos]);
 
   // Centrar el mapa cuando la ubicación llega tras tocar "Mi Ubicación".
   useEffect(() => {
@@ -69,6 +85,8 @@ export default function App() {
     setCategorias(ORDEN_CATEGORIAS);
   };
 
+  const hayFiltros = municipio !== 'todos' || categorias.length < ORDEN_CATEGORIAS.length;
+
   const manejarMiUbicacion = () => {
     if (status === 'ready' && coords) {
       setFoco({ ...coords, key: Date.now() });
@@ -89,7 +107,36 @@ export default function App() {
 
   return (
     <div className="app">
+      <header className="appbar">
+        <span className="appbar__logo" aria-hidden="true">
+          <Landmark size={20} />
+        </span>
+        <span className="appbar__titulo">Oferta Educativa Superior</span>
+        <button
+          type="button"
+          className={`appbar__boton ${hayFiltros ? 'is-activo' : ''}`}
+          onClick={() => setFiltrosAbiertos(true)}
+          aria-expanded={filtrosAbiertos}
+          aria-controls="panel-filtros"
+          aria-label={hayFiltros ? 'Abrir filtros (con filtros activos)' : 'Abrir filtros'}
+        >
+          <SlidersHorizontal size={20} />
+        </button>
+      </header>
+
+      {filtrosAbiertos && (
+        <button
+          type="button"
+          className="appbar__overlay"
+          aria-label="Cerrar filtros"
+          onClick={() => setFiltrosAbiertos(false)}
+        />
+      )}
+
       <Sidebar
+        id="panel-filtros"
+        abierta={filtrosAbiertos}
+        onCerrar={() => setFiltrosAbiertos(false)}
         municipios={municipios}
         municipio={municipio}
         onMunicipio={setMunicipio}

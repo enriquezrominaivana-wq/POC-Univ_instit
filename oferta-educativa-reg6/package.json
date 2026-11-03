@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "data:build": "node scripts/build-data.mjs",
+    "data:enrich": "node scripts/enrich-osm.mjs",
     "check": "node scripts/check-page.mjs http://localhost:5173/",
     "check:interactions": "node scripts/check-interactions.mjs http://localhost:5173/",
     "check:supabase": "node scripts/check-supabase.mjs"

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import '../services/maplibreWorker.js';
 import { DeckGL } from '@deck.gl/react';
-import { FlyToInterpolator } from '@deck.gl/core';
+import { FlyToInterpolator, WebMercatorViewport } from '@deck.gl/core';
 import { ScatterplotLayer } from '@deck.gl/layers';
 import Map from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Crosshair, Minus, Plus, RotateCcw, MapPin } from 'lucide-react';
 import Tooltip from './Tooltip.jsx';
+import PopupInstitucion from './PopupInstitucion.jsx';
 import { CATEGORIA_META } from '../utils/metrics';
 
 // Capa base vectorial gratuita (CARTO) sin necesidad de API key.
@@ -26,6 +27,25 @@ const MAX_ZOOM = 17;
 
 const RADIUS_USUARIO = { metros: 180, halo: 900 };
 
+// En pantallas táctiles los marcadores necesitan ser más grandes para poder tocarlos.
+const ES_TACTIL =
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(pointer: coarse)').matches;
+
+const RADIO_MARCADOR = ES_TACTIL ? { min: 11, max: 38 } : { min: 7, max: 32 };
+
+/** Proyecta lng/lat → coordenadas de pantalla según el viewState actual. */
+function proyectar(viewState, longitud, latitud) {
+  try {
+    const viewport = new WebMercatorViewport(viewState);
+    const [x, y] = viewport.project([longitud, latitud]);
+    return { x, y };
+  } catch {
+    return null;
+  }
+}
+
 export default function MapView({
   registros = [],
   ubicacion = null, // { latitude, longitude }
@@ -35,7 +55,14 @@ export default function MapView({
   onReset,
 }) {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const [hover, setHover] = useState(null); // { registro, x, y }
+  const [hover, setHover] = useState(null); // { registro, x, y } — tooltip al pasar el cursor
+  const [seleccion, setSeleccion] = useState(null); // { registro, x, y } — popup fijado al hacer click
+
+  // Cierra el popup si el registro seleccionado ya no está filtrado.
+  useEffect(() => {
+    if (!seleccion) return;
+    if (!registros.some((r) => r.id === seleccion.registro.id)) setSeleccion(null);
+  }, [registros, seleccion]);
 
   // Recentra el mapa cuando App lo pide (botón "Mi ubicación").
   useEffect(() => {
@@ -65,11 +92,17 @@ export default function MapView({
       filled: true,
       getRadius: RADIUS_USUARIO.metros,
       radiusUnits: 'meters',
-      radiusMinPixels: 7,
-      radiusMaxPixels: 32,
+      radiusMinPixels: RADIO_MARCADOR.min,
+      radiusMaxPixels: RADIO_MARCADOR.max,
       pickable: true,
       onHover: ({ object, x, y }) => {
+        if (seleccion) return; // el popup abierto tiene prioridad sobre el tooltip
         setHover(object ? { registro: object, x, y } : null);
+      },
+      onClick: ({ object, x, y }) => {
+        // Click en un punto → popup fijado; click en zona vacía → se cierra.
+        setHover(null);
+        setSeleccion(object ? { registro: object, x, y } : null);
       },
     });
 
@@ -102,7 +135,7 @@ export default function MapView({
     });
 
     return [capaInstituciones, capaUsuarioHalo, capaUsuario];
-  }, [registros, ubicacion]);
+  }, [registros, ubicacion, seleccion]);
 
   const zoom = (delta) =>
     setViewState((prev) => ({
@@ -122,7 +155,15 @@ export default function MapView({
     <div className="mapa">
       <DeckGL
         viewState={viewState}
-        onViewStateChange={({ viewState: siguiente }) => setViewState(siguiente)}
+        onViewStateChange={({ viewState: siguiente }) => {
+          setViewState(siguiente);
+          // El popup sigue anclado al marcador durante pan/zoom.
+          setSeleccion((prev) => {
+            if (!prev) return prev;
+            const posicion = proyectar(siguiente, prev.registro.longitud, prev.registro.latitud);
+            return posicion ? { ...prev, ...posicion } : prev;
+          });
+        }}
         controller={true}
         layers={layers}
         className="mapa__deck"
@@ -130,11 +171,20 @@ export default function MapView({
         <Map mapStyle={MAP_STYLE} attributionControl={false} />
       </DeckGL>
 
-      {hover && (
+      {hover && !seleccion && (
         <Tooltip
           registro={hover.registro}
           x={hover.x}
           y={hover.y}
+        />
+      )}
+
+      {seleccion && (
+        <PopupInstitucion
+          registro={seleccion.registro}
+          x={seleccion.x}
+          y={seleccion.y}
+          onCerrar={() => setSeleccion(null)}
         />
       )}
 
