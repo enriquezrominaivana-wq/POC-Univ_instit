@@ -1,10 +1,7 @@
 -- ============================================================================
 -- Oferta Educativa Superior · Región Educativa 6
 -- Enriquecimiento de instituciones: sitio web, dirección y teléfono
---
--- Ejecutar en: Supabase → SQL Editor → New query → Run
--- (se puede pegar y ejecutar tal cual; es idempotente)
---
+
 -- Fuentes de los datos:
 --   · OpenStreetMap vía Nominatim  (scripts/enrich-osm.mjs → enriquecimiento.json)
 --   · Carga manual verificada      (src/data/enriquecimiento-curado.json)
@@ -73,3 +70,4 @@ select
   count(*)                                       as total
 from public.instituciones;
 
+-- Ejecutado 03/11/2026 - Se generó una corrección sobre el nombre de la tabla
