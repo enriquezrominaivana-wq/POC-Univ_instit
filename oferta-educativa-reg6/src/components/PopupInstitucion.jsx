@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Globe, MapPin, Navigation, Phone, X } from 'lucide-react';
 import { CATEGORIA_META } from '../utils/metrics';
 import { urlComoLlegar, urlVerEnGoogleMaps } from '../utils/googleMaps';
+import { pushEvento } from '../utils/analytics';
 
 /**
  * Ficha emergente al hacer click en un punto del mapa:
@@ -17,11 +18,34 @@ export default function PopupInstitucion({ registro, x, y, onCerrar }) {
     return () => window.removeEventListener('keydown', alPresionarTecla);
   }, [onCerrar]);
 
+  // Evento de apertura: se dispara al montar la ficha.
+  useEffect(() => {
+    if (!registro) return;
+    pushEvento('popup_institucion', {
+      institucion_id: registro.id,
+      nombre: registro.nombre,
+      municipio: registro.municipio_nombre,
+      categoria: registro.categoria,
+      tiene_sitio_web: Boolean(registro.sitio_web),
+      tiene_telefono: Boolean(registro.telefono),
+      tiene_direccion: Boolean(registro.direccion),
+    });
+  }, [registro]);
+
   if (!registro) return null;
 
   const meta = CATEGORIA_META[registro.categoria];
   // Si el punto queda cerca del borde superior, el popup se ancla debajo.
   const abajo = y < 170;
+
+  const alClickEnlace = (tipo, url = null) => () => {
+    pushEvento('click_enlace_externo', {
+      tipo,
+      institucion: registro.nombre,
+      institucion_id: registro.id,
+      url,
+    });
+  };
 
   return (
     <div
@@ -57,7 +81,12 @@ export default function PopupInstitucion({ registro, x, y, onCerrar }) {
       {registro.telefono && (
         <p className="popup-mapa__dato">
           <Phone size={13} aria-hidden="true" />
-          <a href={`tel:${String(registro.telefono).replace(/\s+/g, '')}`}>{registro.telefono}</a>
+          <a
+            href={`tel:${String(registro.telefono).replace(/\s+/g, '')}`}
+            onClick={alClickEnlace('telefono', `tel:${String(registro.telefono).replace(/\s+/g, '')}`)}
+          >
+            {registro.telefono}
+          </a>
         </p>
       )}
 
@@ -67,6 +96,7 @@ export default function PopupInstitucion({ registro, x, y, onCerrar }) {
           href={urlComoLlegar(registro)}
           target="_blank"
           rel="noreferrer"
+          onClick={alClickEnlace('como_llegar', urlComoLlegar(registro))}
         >
           <Navigation size={13} aria-hidden="true" />
           Cómo llegar
@@ -76,6 +106,7 @@ export default function PopupInstitucion({ registro, x, y, onCerrar }) {
           href={urlVerEnGoogleMaps(registro)}
           target="_blank"
           rel="noreferrer"
+          onClick={alClickEnlace('google_maps', urlVerEnGoogleMaps(registro))}
         >
           <MapPin size={13} aria-hidden="true" />
           Google Maps
@@ -86,6 +117,7 @@ export default function PopupInstitucion({ registro, x, y, onCerrar }) {
             href={registro.sitio_web}
             target="_blank"
             rel="noreferrer"
+            onClick={alClickEnlace('sitio_web', registro.sitio_web)}
           >
             <Globe size={13} aria-hidden="true" />
             Sitio web

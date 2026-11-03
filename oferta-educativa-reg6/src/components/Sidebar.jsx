@@ -1,5 +1,6 @@
 import { Landmark, GraduationCap, Building2, School, MapPin, Loader2, Database, Filter, X } from 'lucide-react';
 import { CATEGORIAS, CATEGORIA_META, ORDEN_CATEGORIAS, formatearNumero } from '../utils/metrics';
+import { pushEvento } from '../utils/analytics';
 
 /**
  * Panel lateral: filtros por municipio y tipo de institución,
@@ -61,7 +62,14 @@ export default function Sidebar({
             <Filter size={15} aria-hidden="true" /> Filtros
           </h2>
           {hayFiltros && (
-            <button type="button" className="sidebar__limpiar" onClick={onLimpiarFiltros}>
+            <button
+              type="button"
+              className="sidebar__limpiar"
+              onClick={() => {
+                pushEvento('limpiar_filtros');
+                onLimpiarFiltros();
+              }}
+            >
               <X size={13} /> Limpiar
             </button>
           )}
@@ -74,7 +82,10 @@ export default function Sidebar({
           id="filtro-municipio"
           className="sidebar__select"
           value={municipio}
-          onChange={(e) => onMunicipio(e.target.value)}
+          onChange={(e) => {
+            pushEvento('filtro_municipio', { municipio: e.target.value });
+            onMunicipio(e.target.value);
+          }}
         >
           <option value="todos">Todos los municipios</option>
           {municipios.map((m) => (
@@ -96,7 +107,14 @@ export default function Sidebar({
                   <input
                     type="checkbox"
                     checked={activa}
-                    onChange={() => onToggleCategoria(categoria)}
+                    onChange={() => {
+                      pushEvento('filtro_categoria', {
+                        categoria,
+                        categoria_label: meta.label,
+                        activada: !activa,
+                      });
+                      onToggleCategoria(categoria);
+                    }}
                   />
                   <span className="categoria__swatch" style={{ background: meta.color }} aria-hidden="true" />
                   <span className="categoria__icono" aria-hidden="true">
