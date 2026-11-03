@@ -1,9 +1,10 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, Landmark, SlidersHorizontal } from 'lucide-react';
 import Sidebar from './components/Sidebar.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import { useFetchData } from './hooks/useFetchData.js';
 import { useUserLocation } from './hooks/useUserLocation.js';
+import { pushEvento } from './utils/analytics';
 import {
   CATEGORIAS,
   ORDEN_CATEGORIAS,
@@ -48,6 +49,17 @@ export default function App() {
     }
   }, [status, coords, centrarPendiente]);
 
+  // Evento con el resultado de la solicitud de ubicación (solo al cambiar de estado).
+  const estadoUbicacionPrevio = useRef(status);
+  useEffect(() => {
+    if (estadoUbicacionPrevio.current === status) return;
+    const anterior = estadoUbicacionPrevio.current;
+    estadoUbicacionPrevio.current = status;
+    if (anterior === 'loading' && (status === 'ready' || status === 'error')) {
+      pushEvento('ubicacion_usuario', { accion: 'resultado', estado: status });
+    }
+  }, [status]);
+
   const municipios = useMemo(() => listarMunicipios(registros), [registros]);
 
   // Registros filtrados por municipio (para los conteos por categoría).
@@ -88,6 +100,7 @@ export default function App() {
   const hayFiltros = municipio !== 'todos' || categorias.length < ORDEN_CATEGORIAS.length;
 
   const manejarMiUbicacion = () => {
+    pushEvento('ubicacion_usuario', { accion: 'click', estado: status });
     if (status === 'ready' && coords) {
       setFoco({ ...coords, key: Date.now() });
       return;

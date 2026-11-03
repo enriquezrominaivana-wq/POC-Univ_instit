@@ -1,3 +1,5 @@
+import { pushEvento } from '../utils/analytics';
+
 /**
  * Distribución por municipio: gráfico de barras apiladas
  * (universidades públicas / privadas / institutos) + totales.
@@ -29,7 +31,13 @@ export default function MunicipalitiesChart({ grupos = [], municipioActivo, onSe
         <ul className="chart__lista">
           {grupos.map((grupo) => {
             const activo = municipioActivo === grupo.municipio;
-            const alternar = () => onSelect(activo ? 'todos' : grupo.municipio);
+            const alternar = () => {
+              pushEvento('grafico_municipio', {
+                municipio: grupo.municipio,
+                accion: activo ? 'quitar' : 'filtrar',
+              });
+              onSelect(activo ? 'todos' : grupo.municipio);
+            };
 
             return (
               <li key={grupo.municipio} className={`chart__fila ${activo ? 'is-activo' : ''}`}>
